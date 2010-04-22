@@ -7,7 +7,8 @@ class DoFacebook
   require "uri"
   require "json"
   
-  API_GRAPH_ENDPOINT = "http://graph.facebook.com/"
+  HTTP_GRAPH_ENDPOINT = "http://graph.facebook.com/"
+  HTTPS_GRAPH_ENDPOINT = "http://graph.facebook.com/"
   
   def initialize(acctok=nil)
     @access_token = acctok
@@ -18,7 +19,7 @@ class DoFacebook
     opts = {:access_token=>@access_token}.merge(opts) if @access_token
     nodepath = connection.nil? ? File.join(id) : File.join(id, connection)
     nodepath += "?#{opts.collect{|k,v| "#{k}=#{v}"}.join("=")}" unless opts.nil? || opts.empty?
-    base = URI.parse(API_GRAPH_ENDPOINT)
+    base = URI.parse(HTTP_GRAPH_ENDPOINT)
     begin
       response = Net::HTTP.start(base.host, base.port) {|http| http.get(File.join("/",nodepath)) }
       return data = JSON.parse(response.body)
@@ -27,6 +28,18 @@ class DoFacebook
     end    
   end
   alias_method :get, :node
+  
+  
+  def update(id, connection, opts={})
+    opts = {:access_token=>@access_token}.merge(opts) if @access_token
+    nodepath = File.join(id, connection)
+    begin
+      response = Net::HTTP.post_form( URI.parse(File.join(HTTPS_GRAPH_ENDPOINT,nodepath)), opts )
+    # rescue Exception => e
+    #   return nil
+    end
+  end
+  alias_method :post, :update
 
     
 end #DoFacebook
