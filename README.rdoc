@@ -1,0 +1,8 @@
+= DoFacebook
+Interact with the Facebook Open Graph API.
+
+
+
+= COPYRIGHT
+Copyright 2010 Colin McCloskey (http://mccolin.com/), but, hell, you can use it as you please ;-)
+
