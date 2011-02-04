@@ -1,8 +1,10 @@
 = DoFacebook
-Interact with the Facebook Open Graph API.
+
+Push and Pull data along the Facebook OpenGraph API.
+
 
 
 
 = COPYRIGHT
-Copyright 2010 Colin McCloskey (http://mccolin.com/), but, hell, you can use it as you please ;-)
+Copyright 2011 Awexome Labs, LLC (http://awexomelabs.com), but freely usable.
 
