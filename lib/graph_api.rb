@@ -57,10 +57,13 @@ module DoOpenGraph
       href = File.join(base, path)
       
       # Make our POST request and check the results:
-      response = Typhoeus::Request.post(href, :params=>params)
-      data = JSON.parse(response.body)
-      return data
-      
+      begin
+        response = Typhoeus::Request.post(href, :params=>params)
+        data = JSON.parse(response.body)
+        return GraphResponse.new(data)
+      rescue JSON::ParserError => jsone
+        raise "Invalid JSON or poorly formed JSON returned for #{path}" and return nil
+      end      
     end
     alias_method :post, :update
     
