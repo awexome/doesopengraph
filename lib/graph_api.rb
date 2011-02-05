@@ -85,8 +85,24 @@ module DoOpenGraph
         return GraphResponse.new(data)
       rescue JSON::ParserError => jsone
         raise "Invalid JSON or poorly formed JSON returned for #{path}" and return nil
-      end      
+      end
+    end
+    
+    
+    def search(query, type, params={})
+      # Inject the access token if we have it and err if we don't
+      return nil unless @access_token
+      params[:access_token] = @access_token
       
+      # Build the search query and its target:
+      params[:q] = query
+      params[:type] = type
+      href = File.join(HTTPS_GRAPH_ENDPOINT, "search")
+      
+      # Make the request:
+      response = Typhoeus::Request.get(href, :params=>params)
+      data = JSON.parse(response.body)
+      return GraphResponse.new(data)
     end
     
   
