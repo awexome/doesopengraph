@@ -46,16 +46,25 @@ module DoOpenGraph
     alias_method :get, :node
     
   
-    def update(id, connection, opts={})
-      opts = {:access_token=>@access_token}.merge(opts) if @access_token
-      nodepath = File.join(id, connection)
-      begin
-        response = Net::HTTP.post_form( URI.parse(File.join(HTTPS_GRAPH_ENDPOINT,nodepath)), opts )
-      # rescue Exception => e
-      #   return nil
-      end
+    def update(id, connection, params={})
+      # Inject the access token if we have it and err if we don't
+      return nil unless @access_token
+      params[:access_token] = @access_token
+      
+      # Smoosh the URL components together:
+      base = HTTPS_GRAPH_ENDPOINT
+      path = File.join(id, connection)
+      href = File.join(base, path)
+      
+      # Make our POST request and check the results:
+      response = Typhoeus::Request.post(href, :params=>params)
+      data = JSON.parse(response.body)
+      return data
+      
     end
     alias_method :post, :update
+    
+  
 
   end # GraphAPI    
 end # DoOpenGraph
