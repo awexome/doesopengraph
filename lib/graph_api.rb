@@ -67,6 +67,28 @@ module DoOpenGraph
     end
     alias_method :post, :update
     
+    
+    def delete(id, connection=nil)
+      # Inject the access token if we have it and err if we don't
+      return nil unless @access_token
+      params = Hash.new and params[:access_token] = @access_token
+      
+      # Smoosh the URL components together:
+      base = HTTPS_GRAPH_ENDPOINT
+      path = connection.nil? ? id : File.join(id, connection)
+      href = File.join(base, path)
+      
+      # Make our DELETE request and return the results:
+      begin
+        response = Typhoeus::Request.delete(href, :params=>params)
+        data = JSON.parse(response.body)
+        return GraphResponse.new(data)
+      rescue JSON::ParserError => jsone
+        raise "Invalid JSON or poorly formed JSON returned for #{path}" and return nil
+      end      
+      
+    end
+    
   
 
   end # GraphAPI    
