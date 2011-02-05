@@ -1,4 +1,4 @@
-= DoFacebook
+= DoOpenGraph
 
 Push and Pull data along the Facebook OpenGraph API.
 
