@@ -29,6 +29,11 @@ module DoOpenGraph
       api.post(self.id, "likes")
     end
     
+    # Unlike this node, if supported
+    def unlike
+      api.delete(self.id, "likes")
+    end
+    
 
   end # GraphNode    
 end # DoOpenGraph
