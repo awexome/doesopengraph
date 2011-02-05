@@ -1,5 +1,9 @@
-# AWEXOME
-# DoOpenGraph - meat and potatoes
+# AWEXOME LABS
+# DoOpenGraph
+#
+# GraphAPI - Class containing get and post mechanism for accessing nodes
+#  within the open graph
+#
 
 module DoOpenGraph
   class GraphAPI
