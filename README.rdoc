@@ -1,10 +1,11 @@
 = DoOpenGraph
 
-Push and Pull data along the Facebook OpenGraph API.
+The Awexome Labs client library for accessing and manipulating the Facebook
+OpenGraph in ruby
 
 
+== Copyright
 
-
-= COPYRIGHT
-Copyright 2011 Awexome Labs, LLC (http://awexomelabs.com), but freely usable.
+Copyright (C) 2011 by Awexome Labs, LLC
+http://awexomelabs.com
 
