@@ -1,4 +1,4 @@
-= DoOpenGraph
+= DoesOpenGraph
 
 The Awexome Labs client library for accessing and manipulating the Facebook
 OpenGraph in ruby
