@@ -1,10 +1,10 @@
 # AWEXOME LABS
-# DoOpenGraph
+# DoesOpenGraph
 #
 # GraphNode - An instance of an item on the open graph
 #
 
-module DoOpenGraph
+module DoesOpenGraph
   class GraphNode < GraphResponse
 
     # Fetch an updated view of this node
@@ -36,7 +36,7 @@ module DoOpenGraph
     
 
   end # GraphNode    
-end # DoOpenGraph
+end # DoesOpenGraph
       
 
 

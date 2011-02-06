@@ -1,10 +1,10 @@
 # AWEXOME LABS
-# DoOpenGraph
+# DoesOpenGraph
 #
 # GraphResponse - A very simple wrapper for data returned by the OpenGraph API
 #
 
-module DoOpenGraph
+module DoesOpenGraph
   class GraphResponse
 
     attr_reader :content, :api
@@ -21,7 +21,7 @@ module DoOpenGraph
     end
 
   end # GraphResponse    
-end # DoOpenGraph
+end # DoesOpenGraph
       
 
 

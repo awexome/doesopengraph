@@ -1,11 +1,11 @@
 # AWEXOME LABS
-# DoOpenGraph
+# DoesOpenGraph
 #
 # GraphAPI - Class containing get and post mechanism for accessing nodes
 #  within the open graph
 #
 
-module DoOpenGraph
+module DoesOpenGraph
   class GraphAPI
 
     require 'typhoeus'
@@ -108,7 +108,7 @@ module DoOpenGraph
   
 
   end # GraphAPI    
-end # DoOpenGraph
+end # DoesOpenGraph
       
 
 
