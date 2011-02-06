@@ -8,7 +8,7 @@
 module DoesOpenGraph
   class GraphAPI
 
-    require 'typhoeus'
+    require "typhoeus"
     require "uri"
     require "json"
   
