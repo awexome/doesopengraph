@@ -14,8 +14,9 @@ begin
     gem.homepage = "http://awexomelabs.com/"
     gem.authors = ["mccolin"]
     gem.version = File.exist?('VERSION') ? File.read('VERSION') : "NOVERSION"
-    # other fields that would normally go in your gemspec
-    # like authors, email and has_rdoc can also be included here
+
+    # DoesOpenGraph depends on Typhoeus for communication:
+    gem.add_dependency "typhoeus", ">=0.2.0"
   end
 rescue
   puts "Jeweler or one of its dependencies is not installed."

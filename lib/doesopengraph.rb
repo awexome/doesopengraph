@@ -1,11 +1,12 @@
 # AWEXOME
 # DoesOpenGraph
 #
-# DoesOpenGraph - Initializer
+# DoesOpenGraph - Module definition and loader
 
-require File.join( File.dirname(__FILE__), "lib", "graph_api")
-require File.join( File.dirname(__FILE__), "lib", "graph_response")
-require File.join( File.dirname(__FILE__), "lib", "graph_node")
+require "doesfacebook"
+require "doesfacebook/graph_api"
+require "doesfacebook/graph_response"
+require "doesfacebook/graph_node"
 
 module DoesOpenGraph
 end
