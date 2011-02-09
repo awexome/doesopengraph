@@ -3,10 +3,10 @@
 #
 # DoesOpenGraph - Module definition and loader
 
-require "doesfacebook"
-require "doesfacebook/graph_api"
-require "doesfacebook/graph_response"
-require "doesfacebook/graph_node"
+require "doesopengraph"
+require "doesopengraph/graph_api"
+require "doesopengraph/graph_response"
+require "doesopengraph/graph_node"
 
 module DoesOpenGraph
 end
