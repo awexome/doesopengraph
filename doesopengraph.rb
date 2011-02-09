@@ -3,9 +3,9 @@
 #
 # DoesOpenGraph - Initializer
 
-require './lib/graph_api.rb'
-require './lib/graph_response.rb'
-require './lib/graph_node.rb'
+require File.join( File.dirname(__FILE__), "lib", "graph_api")
+require File.join( File.dirname(__FILE__), "lib", "graph_response")
+require File.join( File.dirname(__FILE__), "lib", "graph_node")
 
 module DoesOpenGraph
 end

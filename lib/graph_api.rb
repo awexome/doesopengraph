@@ -25,6 +25,10 @@ module DoesOpenGraph
     def node(id, connection=nil, params={})
       # Inject an access_token if we plan to make an authorized request:
       params[:access_token] = @access_token if @access_token
+      
+      # Stringify tokens:
+      id = id.to_s
+      connection = connection.to_s unless connection.nil?
 
       # Smoosh the URL components together:
       base = @access_token.nil? ? HTTP_GRAPH_ENDPOINT : HTTPS_GRAPH_ENDPOINT
