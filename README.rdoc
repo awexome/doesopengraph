@@ -1,7 +1,124 @@
 = DoesOpenGraph
 
 The Awexome Labs client library for accessing and manipulating the Facebook
-OpenGraph in ruby
+OpenGraph in ruby.
+
+DoesOpenGraph is designed to be a paper-thin library for accessing and manipulating
+data on the Facebook Open Graph. It does not provide a high number of task or object-
+specific integration points, instead relying on your application to discern the
+type and content of each Node you access.
+
+Likewise, the library is not configured with a YAML file, but is instead initialized
+when you instantiate an object of the GraphAPI. This makes the library ideal for use
+in ruby applications and scripts of all types, not just in rails.
+
+If you are interested in full configuration for, say, a rails app, you can pair up
+with DoesFacebook, or library for parsing signed requests from Facebook and providing
+convenience methods to controllers and views.
+
+== Installation
+
+To install the gem, do the usual:
+
+  gem install doesopengraph
+  
+If you plan on using DoesOpenGraph in a project with a Gemfile:
+
+  gem "doesopengraph", ">=0.1.0"
+  
+You can live on the edge, too, if you like:
+
+  gem "doesopengraph", ">=0.1.0", :git=>"git://github.com/awexome/doesopengraph.git"
+
+
+== Example Usage
+
+Using DoesOpenGraph is easy. You can access public content without an access token. To
+do so, just spin up a non-private API instance and go:
+
+  include DoesOpenGraph
+  api = GraphAPI.new()
+   => #<DoesOpenGraph::GraphAPI:0x00000100a13320 @access_token=nil> 
+   
+  node = api.node("philadelphiaflyers")
+   => #<DoesOpenGraph::GraphNode:0x00000100a055e0 @content={"id"=>"87169796810", "name"=>"Philadelphia Flyers", "picture"=>"http://profile.ak.fbcdn.net/hprofile-ak-snc4/71177_87169796810_7868331_s.jpg", "link"=>"http://www.facebook.com/philadelphiaflyers", "category"=>"Professional sports team", "website"=>"http://philadelphiaflyers.com\nhttp://www.youtube.com/flyersorganization\nhttp://twitter.com/NHLFLYERS\nhttp://profile.myspace.com/index.cfm?fuseaction=user.viewprofile&friendid=154192480&MyToken=aea080cc-eb98-4a80-ad56-2cc34210c0aa", "username"=>"philadelphiaflyers", "location"=>{"street"=>"Wells Fargo Center, 3601 South Broad St.", "city"=>"Philadelphia", "state"=>"PA", "country"=>"United States", "zip"=>"19148"}, "phone"=>"215.218.PUCK (7825)", "affiliation"=>"NHL", "likes"=>446371}, @api=#<DoesOpenGraph::GraphAPI:0x00000100a13320 @access_token=nil>>
+
+You'll see that accessing a public page via the GraphAPI will return a GraphNode object
+containing attributes from the graph document. You can access these attributes directly:
+
+  node.likes
+   => 446374 
+  node.affiliation
+   => "NHL" 
+  node.phone
+   => "215.218.PUCK (7825)" 
+  node.category
+   => "Professional sports team" 
+  node.picture
+   => "http://profile.ak.fbcdn.net/hprofile-ak-snc4/71177_87169796810_7868331_s.jpg"
+
+Not bad. You may also notice that the returned GraphNode object contains a reference to
+the GraphAPI object that was used to access it. This allows you to run a reload on the
+node just as if it were an ActiveRecord object. Reloading will pull the latest content
+from the Open Graph and update your local object. So if someone had come along and liked
+or unliked the page in the time we'd been playing around, we'd see the increase or decrease:
+
+  node.reload
+   => [updated GraphNode object returned]
+  node.likes
+   => 446373        # Whoops! One less fan! :-(
+   
+   
+== Load Node Metadata and Connections
+
+For any node object you've pulled from the graph, you can ask it what it's capable of
+providing. This allows you to see all of the fancy bits that may extend or be attached to
+the user, page, or object you're looking at. These are called "connections" in the graph.
+
+Not sure what connections are at your disposal? Ask!
+
+  node.introspect
+  => #<DoesOpenGraph::GraphNode:0x000001009a49c0 @content={"id"=>"87169796810", "name"=>"Philadelphia Flyers", "picture"=>"http://profile.ak.fbcdn.net/hprofile-ak-snc4/71177_87169796810_7868331_s.jpg", "link"=>"http://www.facebook.com/philadelphiaflyers", "category"=>"Professional sports team", "website"=>"http://philadelphiaflyers.com\nhttp://www.youtube.com/flyersorganization\nhttp://twitter.com/NHLFLYERS\nhttp://profile.myspace.com/index.cfm?fuseaction=user.viewprofile&friendid=154192480&MyToken=aea080cc-eb98-4a80-ad56-2cc34210c0aa", "username"=>"philadelphiaflyers", "location"=>{"street"=>"Wells Fargo Center, 3601 South Broad St.", "city"=>"Philadelphia", "state"=>"PA", "country"=>"United States", "zip"=>"19148"}, "phone"=>"215.218.PUCK (7825)", "affiliation"=>"NHL", "likes"=>446373, "metadata"=>{"connections"=>{"feed"=>"http://graph.facebook.com/87169796810/feed", "posts"=>"http://graph.facebook.com/87169796810/posts", "tagged"=>"http://graph.facebook.com/87169796810/tagged", "statuses"=>"http://graph.facebook.com/87169796810/statuses", "links"=>"http://graph.facebook.com/87169796810/links", "notes"=>"http://graph.facebook.com/87169796810/notes", "photos"=>"http://graph.facebook.com/87169796810/photos", "albums"=>"http://graph.facebook.com/87169796810/albums", "events"=>"http://graph.facebook.com/87169796810/events", "videos"=>"http://graph.facebook.com/87169796810/videos"}, "fields"=>[{"name"=>"id", "description"=>"The Page's ID. Publicly available. A JSON string."}, {"name"=>"name", "description"=>"The Page's name. Publicly available. A JSON string."}, {"name"=>"category", "description"=>"The Page's category. Publicly available. A JSON string."}, {"name"=>"likes", "description"=>"\\* The number of users who like the Page. Publicly available. A JSON number."}]}, "type"=>"page"}, @api=#<DoesOpenGraph::GraphAPI:0x00000100a13320 @access_token=nil>> 
+
+Perhaps that's too much to read through, but the key point is that introspecting a node
+returns the very same node, but includes the all-important metadata attribute, which you
+can pull available connections from:
+
+  node.introspect.metadata["connections"]
+  => {"feed"=>"http://graph.facebook.com/87169796810/feed", "posts"=>"http://graph.facebook.com/87169796810/posts", "tagged"=>"http://graph.facebook.com/87169796810/tagged", "statuses"=>"http://graph.facebook.com/87169796810/statuses", "links"=>"http://graph.facebook.com/87169796810/links", "notes"=>"http://graph.facebook.com/87169796810/notes", "photos"=>"http://graph.facebook.com/87169796810/photos", "albums"=>"http://graph.facebook.com/87169796810/albums", "events"=>"http://graph.facebook.com/87169796810/events", "videos"=>"http://graph.facebook.com/87169796810/videos"} 
+
+Curious as to the public feed of the node object? Grab it like so:
+
+  node = api.node("philadelphiaflyers", "feed")
+  => # A huge list of feed posts you can play with
+  node = api.node("philadelphiaflyers", "photos")
+  => # Likewise huge list of photos to do fun things with
+
+And that's pretty much it.
+
+
+== Private and Privileged Usage
+
+You can do more than read and reload objects on the graph, however. It's easy to post new
+connection pieces, remove content from the graph, and remove and alter connections to
+specific nodes on the Open Graph.
+
+To do it, you'll need an OAuth access token. Your application can handle this by following
+any of the Facebook methods documented at http://developers.facebook.com/docs/authentication
+
+Once you have an access token for a particular user, page, or node, instantiate a special
+GraphAPI object with it for easy-access:
+
+  api = GraphAPI.new("__YOUR_ACCESS_TOKEN_HERE__")
+
+With a privileged API client, you can now expose the following methods of the API:
+
+  api.node()    # just like before, but with more info; also known as api.get()
+  api.update()  # alter and add data; also known as api.post()
+  api.delete()  # delete something from the graph (a post, connection, or node)
+  api.search()  # search the entire open graph
+  
+Explore and enjoy!  
 
 
 == Copyright
