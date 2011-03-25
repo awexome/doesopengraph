@@ -63,7 +63,8 @@ module DoesOpenGraph
         data = JSON.parse(response.body)
         return GraphResponse.new(data)
       rescue JSON::ParserError => jsone
-        raise "Invalid JSON or poorly formed JSON returned for #{path}" and return nil
+        # A JSON.parse on "true" triggers an error, so let's build it straight from body:
+        return GraphResponse.new(response.body)
       end      
     end
     alias_method :post, :update
@@ -85,7 +86,8 @@ module DoesOpenGraph
         data = JSON.parse(response.body)
         return GraphResponse.new(data)
       rescue JSON::ParserError => jsone
-        raise "Invalid JSON or poorly formed JSON returned for #{path}" and return nil
+        # A JSON.parse on "true" triggers an error, so let's build it straight from body:
+        return GraphResponse.new(response.body)
       end
     end
     
