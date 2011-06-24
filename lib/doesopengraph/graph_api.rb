@@ -41,7 +41,7 @@ module DoesOpenGraph
       end
       
       hydra.run
-      responses
+      Hash[responses.map{|node| [node.content["id"], node] }]
     end
 
 
