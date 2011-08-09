@@ -28,6 +28,7 @@ module DoesOpenGraph
       ids.each do |id|
         request = node(id, connection, params, true)
         request.on_complete do |response|
+          raise "Response body was 'false', not sure what Graph means by this" if response.body == "false"
           begin
             data = JSON.parse(response.body)
             responses << GraphNode.new(data, self)
@@ -64,7 +65,7 @@ module DoesOpenGraph
         # Make a request and parse JSON result:
         begin
           response = Typhoeus::Request.get(href, :params=>params)
-          debugger
+          raise "Response body was 'false', not sure what Graph means by this" if response.body == "false"
           data = JSON.parse(response.body)
           return GraphNode.new(data, self)
         rescue JSON::ParserError => jsone
