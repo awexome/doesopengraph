@@ -27,31 +27,6 @@ module DoesOpenGraph
       return request(:get, path, params)
     end
     alias_method :get, :node
-  
-  
-    def node2(id, connection=nil, params={})
-      # Inject an access_token if we plan to make an authorized request:
-      params[:access_token] = @access_token if @access_token
-      
-      # Stringify tokens:
-      id = id.to_s
-      connection = connection.to_s unless connection.nil?
-
-      # Smoosh the URL components together:
-      base = @access_token.nil? ? HTTP_GRAPH_ENDPOINT : HTTPS_GRAPH_ENDPOINT
-      path = connection.nil? ? id : File.join(id, connection)
-      href = File.join(base, path)
-      
-      # Make a request and parse JSON result:
-      begin
-        response = Typhoeus::Request.get(href, :params=>params)
-        data = JSON.parse(response.body)
-        return GraphNode.new(data, self)
-      rescue JSON::ParserError => jsone
-        raise "Invalid JSON or poorly formed JSON returned for #{path}" and return nil
-      end
-    end
-
     
   
     def update(id, connection, params={})
