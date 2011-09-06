@@ -23,6 +23,13 @@ module DoesOpenGraph
   
   
     def node(id, connection=nil, params={})
+      path = connection.nil? ? id.to_s : File.join(id.to_s, connection.to_s)
+      return request(:get, path, params)
+    end
+    alias_method :get, :node
+  
+  
+    def node2(id, connection=nil, params={})
       # Inject an access_token if we plan to make an authorized request:
       params[:access_token] = @access_token if @access_token
       
@@ -44,7 +51,7 @@ module DoesOpenGraph
         raise "Invalid JSON or poorly formed JSON returned for #{path}" and return nil
       end
     end
-    alias_method :get, :node
+
     
   
     def update(id, connection, params={})
@@ -107,6 +114,31 @@ module DoesOpenGraph
       data = JSON.parse(response.body)
       return GraphResponse.new(data)
     end
+    
+    
+    
+    private
+    
+    
+    def request(method, path, params={})
+      base = @access_token.nil? ? HTTP_GRAPH_ENDPOINT : HTTPS_GRAPH_ENDPOINT
+      href = File.join(base, path)
+      
+      if !%w(get post delete).include?(method.to_s)
+        raise "Invalid HTTP method #{method} passed to request" and return nil
+      end
+      
+      params[:access_token] = @access_token if @access_token
+      
+      begin
+        response = Typhoeus::Request.send(method, href, :params=>params)
+        data = JSON.parse(response.body)
+        return GraphNode.new(data, self)
+      rescue JSON::ParserError => jsone
+        raise "Invalid JSON or poorly formed JSON returned for #{path}" and return nil
+      end      
+    end
+
     
   
 
