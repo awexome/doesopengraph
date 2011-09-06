@@ -30,24 +30,9 @@ module DoesOpenGraph
     
   
     def update(id, connection, params={})
-      # Inject the access token if we have it and err if we don't
       return nil unless @access_token
-      params[:access_token] = @access_token
-      
-      # Smoosh the URL components together:
-      base = HTTPS_GRAPH_ENDPOINT
-      path = File.join(id, connection)
-      href = File.join(base, path)
-      
-      # Make our POST request and check the results:
-      begin
-        response = Typhoeus::Request.post(href, :params=>params)
-        data = JSON.parse(response.body)
-        return GraphResponse.new(data)
-      rescue JSON::ParserError => jsone
-        # A JSON.parse on "true" triggers an error, so let's build it straight from body:
-        return GraphResponse.new(response.body)
-      end      
+      path = connection.nil? ? id.to_s : File.join(id.to_s, connection.to_s)
+      return request(:post, path, params)
     end
     alias_method :post, :update
     
@@ -110,6 +95,8 @@ module DoesOpenGraph
         data = JSON.parse(response.body)
         return GraphNode.new(data, self)
       rescue JSON::ParserError => jsone
+        return true if response.body == "true"
+        return false if response.body == "false"
         raise "Invalid JSON or poorly formed JSON returned for #{path}" and return nil
       end      
     end
