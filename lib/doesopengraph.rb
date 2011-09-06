@@ -9,4 +9,9 @@ require "doesopengraph/graph_response"
 require "doesopengraph/graph_node"
 
 module DoesOpenGraph
+  
+  def self.version
+    Gem.loaded_specs["doesopengraph"].version.to_s
+  end
+  
 end
