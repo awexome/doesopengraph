@@ -38,43 +38,20 @@ module DoesOpenGraph
     
     
     def delete(id, connection=nil)
-      # Inject the access token if we have it and err if we don't
       return nil unless @access_token
-      params = Hash.new and params[:access_token] = @access_token
-      
-      # Smoosh the URL components together:
-      base = HTTPS_GRAPH_ENDPOINT
-      path = connection.nil? ? id : File.join(id, connection)
-      href = File.join(base, path)
-      
-      # Make our DELETE request and return the results:
-      begin
-        response = Typhoeus::Request.delete(href, :params=>params)
-        data = JSON.parse(response.body)
-        return GraphResponse.new(data)
-      rescue JSON::ParserError => jsone
-        # A JSON.parse on "true" triggers an error, so let's build it straight from body:
-        return GraphResponse.new(response.body)
-      end
+      path = connection.nil? ? id.to_s : File.join(id.to_s, connection.to_s)
+      return request(:delete, path)
     end
     
-    
+
     def search(query, type, params={})
-      # Inject the access token if we have it and err if we don't
       return nil unless @access_token
-      params[:access_token] = @access_token
-      
-      # Build the search query and its target:
-      params[:q] = query
-      params[:type] = type
-      href = File.join(HTTPS_GRAPH_ENDPOINT, "search")
-      
-      # Make the request:
-      response = Typhoeus::Request.get(href, :params=>params)
-      data = JSON.parse(response.body)
-      return GraphResponse.new(data)
+      params[:q] = query.to_s
+      params[:type] = type.to_s      
+      request(:get, "search", params)
     end
     
+  
     
     
     private
@@ -93,6 +70,7 @@ module DoesOpenGraph
       begin
         response = Typhoeus::Request.send(method, href, :params=>params)
         data = JSON.parse(response.body)
+        return GraphResponse.new(data, self) if path == "search"
         return GraphNode.new(data, self)
       rescue JSON::ParserError => jsone
         return true if response.body == "true"
