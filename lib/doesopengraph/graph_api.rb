@@ -6,6 +6,12 @@
 #
 
 module DoesOpenGraph
+  
+  class OpenGraphException < Exception; end
+  class InvalidResponseFromFacebook < OpenGraphException; end
+
+  
+  
   class GraphAPI
 
     require "typhoeus"
@@ -15,13 +21,14 @@ module DoesOpenGraph
     HTTP_GRAPH_ENDPOINT = "http://graph.facebook.com/"
     HTTPS_GRAPH_ENDPOINT = "https://graph.facebook.com/"
     
-    attr_reader :access_token
+    attr_reader :access_token, :history
   
     def initialize(acctok=nil)
       @access_token = acctok
+      @history = Array.new
     end
-  
-  
+    
+    
     def node(id, connection=nil, params={})
       path = connection.nil? ? id.to_s : File.join(id.to_s, connection.to_s)
       return request(:get, path, params)
@@ -51,6 +58,20 @@ module DoesOpenGraph
       request(:get, "search", params)
     end
     
+    
+    def num_requests
+      @history.length
+    end
+    
+    def previous_request
+      method, path, params = @history.last
+      return {:method=>method, :path=>path, :params=>params}
+    end
+    
+    def repeat
+      pr = previous_request
+      return request(pr[:method], pr[:path], pr[:params])
+    end    
   
     
     
@@ -58,6 +79,8 @@ module DoesOpenGraph
     
     
     def request(method, path, params={})
+      @history << [method, path, params]
+      
       base = @access_token.nil? ? HTTP_GRAPH_ENDPOINT : HTTPS_GRAPH_ENDPOINT
       href = File.join(base, path)
       
@@ -75,7 +98,9 @@ module DoesOpenGraph
       rescue JSON::ParserError => jsone
         return true if response.body == "true"
         return false if response.body == "false"
-        raise "Invalid JSON or poorly formed JSON returned for #{path}" and return nil
+        raise InvalidResponseFromFacebook.new("Invalid JSON or poorly formed JSON returned for #{path}") and return nil
+      rescue Exception => e
+        raise OpenGraphException.new("Error in OpenGraph response: #{e}") and return nil
       end      
     end
 
