@@ -3,10 +3,12 @@
 #
 # DoesOpenGraph - Module definition and loader
 
+require 'hashie'
+
 require "doesopengraph"
 require "doesopengraph/graph_api"
+require "doesopengraph/graph_request"
 require "doesopengraph/graph_response"
-require "doesopengraph/graph_node"
 
 module DoesOpenGraph
   

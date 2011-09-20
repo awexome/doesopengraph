@@ -8,6 +8,8 @@
 module DoesOpenGraph
   
   class OpenGraphException < Exception; end
+  class IncapableOfUpdateMethods < OpenGraphException; end
+  class InvalidRequestMethod < OpenGraphException; end
   class InvalidResponseFromFacebook < OpenGraphException; end
 
   
@@ -26,6 +28,10 @@ module DoesOpenGraph
     def initialize(acctok=nil)
       @access_token = acctok
       @history = Array.new
+    end
+    
+    def renew(acctok)
+      @access_token = acctok
     end
     
     
@@ -64,13 +70,11 @@ module DoesOpenGraph
     end
     
     def previous_request
-      method, path, params = @history.last
-      return {:method=>method, :path=>path, :params=>params}
+      @history.last
     end
     
     def repeat
-      pr = previous_request
-      return request(pr[:method], pr[:path], pr[:params])
+      previous_request.request()
     end    
   
     
@@ -79,32 +83,10 @@ module DoesOpenGraph
     
     
     def request(method, path, params={})
-      @history << [method, path, params]
-      
-      base = @access_token.nil? ? HTTP_GRAPH_ENDPOINT : HTTPS_GRAPH_ENDPOINT
-      href = File.join(base, path)
-      
-      if !%w(get post delete).include?(method.to_s)
-        raise "Invalid HTTP method #{method} passed to request" and return nil
-      end
-      
-      params[:access_token] = @access_token if @access_token
-      
-      begin
-        response = Typhoeus::Request.send(method, href, :params=>params)
-        data = JSON.parse(response.body)
-        return GraphResponse.new(data, self) if path == "search"
-        return GraphNode.new(data, self)
-      rescue JSON::ParserError => jsone
-        return true if response.body == "true"
-        return false if response.body == "false"
-        raise InvalidResponseFromFacebook.new("Invalid JSON or poorly formed JSON returned for #{path}") and return nil
-      rescue Exception => e
-        raise OpenGraphException.new("Error in OpenGraph response: #{e}") and return nil
-      end      
+      api_request = GraphRequest.new(self, method, path, params)
+      @history << api_request
+      return api_request.request()
     end
-
-    
   
 
   end # GraphAPI    
