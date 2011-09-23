@@ -49,6 +49,16 @@ module DoesOpenGraph
       return self
     end
     
+    # Is this response an error?
+    def error?
+      keys.include?(:error)
+    end
+    
+    # What is the error return from Facebook in this response?
+    def error_message
+      @object.error ? @object.error.message : nil
+    end
+    
     # Introspect on the connections available to this node
     def introspect
       raise IncapableOfUpdateMethods.new("Cannot update content without stored request") if request.nil?
@@ -58,8 +68,15 @@ module DoesOpenGraph
     # Get a connection of this node
     def get(connection, params={})
       raise IncapableOfUpdateMethods.new("Cannot update content without stored request") if request.nil?
-      request.api.get(object.id, connection, params={})
+      request.api.get(object.id, connection, params)
     end
+    
+    # Post to a connection of this node
+    def post(connection, params={})
+      raise IncapableOfUpdateMethods.new("Cannot update content without stored request") if request.nil?
+      request.api.post(object.id, connection, params)
+    end
+    
     
     # Load the next page of the response if paging is available
     def next_page; page("next"); end

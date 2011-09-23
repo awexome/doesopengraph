@@ -7,7 +7,7 @@
 module DoesOpenGraph
   class GraphRequest
 
-    attr_reader :api, :method, :path, :params
+    attr_reader :api, :method, :path, :params, :href
     
     # Build a Request object from its component parts
     def initialize(api, method, path, params={})
@@ -15,13 +15,14 @@ module DoesOpenGraph
       @method = method
       @path = path
       @params = params
+      @href = nil
     end
     
     
     # Perform the request
     def request
       base = @api.access_token ? GraphAPI::HTTPS_GRAPH_ENDPOINT : GraphAPI::HTTP_GRAPH_ENDPOINT
-      href = File.join(base, @path)
+      @href = File.join(base, @path)
       
       if !%w(get post delete).include?(@method.to_s)
         raise InvalidRequestMethod.new("Invalid HTTP method #{@method} passed to request") and return nil
@@ -30,7 +31,7 @@ module DoesOpenGraph
       params[:access_token] = @api.access_token if @api.access_token
       
       begin
-        response = Typhoeus::Request.send(@method, href, :params=>@params)
+        response = Typhoeus::Request.send(@method, @href, :params=>@params)
         puts "RESPONSE RECEIVED FROM FACEBOOK ON REQUEST TO PATH #{@path}:\n#{response.body}\n\n"
         
         return GraphResponse.new(response.body, self)
