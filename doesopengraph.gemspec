@@ -19,6 +19,7 @@ Gem::Specification.new do |s|
   s.files = [
     "lib/doesopengraph.rb",
     "lib/doesopengraph/graph_api.rb",
+    "lib/doesopengraph/graph_node.rb",
     "lib/doesopengraph/graph_response.rb"
   ]
   s.homepage = %q{http://awexomelabs.com/}
