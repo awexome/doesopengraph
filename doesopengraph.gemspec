@@ -5,12 +5,12 @@
 
 Gem::Specification.new do |s|
   s.name = %q{doesopengraph}
-  s.version = "0.1.1"
+  s.version = "0.2.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["mccolin"]
-  s.date = %q{2011-03-25}
-  s.description = %q{The Awexome Labs library for accessing and manipulating the Facebook OpenGraph}
+  s.date = %q{2011-09-06}
+  s.description = %q{Content-type-agnostic library for accessing and manipulating the Facebook OpenGraph with all major methods and search}
   s.email = %q{info@awexomelabs.com}
   s.extra_rdoc_files = [
     "LICENSE",

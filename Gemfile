@@ -7,9 +7,9 @@ source "http://rubygems.org"
 
 # Runtime dependencies:
 gem "typhoeus", ">=0.2.0"
+gem "hashie"
 
 # Development dependencies:
 group :development do
-  gem "bundler", "~> 1.0.0"
-  gem "jeweler", "~> 1.5.1"
+  gem "jeweler", "~> 1.8.3"
 end

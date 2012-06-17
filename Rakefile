@@ -8,7 +8,7 @@ begin
   Jeweler::Tasks.new do |gem|
     gem.name = "doesopengraph"
     gem.summary = "The Awexome Labs library for accessing and manipulating the Facebook OpenGraph"
-    gem.description = "The Awexome Labs library for accessing and manipulating the Facebook OpenGraph"
+    gem.description = "Content-type-agnostic library for accessing and manipulating the Facebook OpenGraph with all major methods and search"
     gem.files = Dir["{lib}/**/*"]
     gem.email = "info@awexomelabs.com"
     gem.homepage = "http://awexomelabs.com/"

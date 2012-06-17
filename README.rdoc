@@ -13,8 +13,9 @@ when you instantiate an object of the GraphAPI. This makes the library ideal for
 in ruby applications and scripts of all types, not just in rails.
 
 If you are interested in full configuration for, say, a rails app, you can pair up
-with DoesFacebook, or library for parsing signed requests from Facebook and providing
-convenience methods to controllers and views.
+with DoesFacebook[https://github.com/awexome/doesfacebook], our library for parsing 
+signed requests from Facebook and providing convenience methods to controllers and 
+views.
 
 == Installation
 
@@ -24,11 +25,11 @@ To install the gem, do the usual:
   
 If you plan on using DoesOpenGraph in a project with a Gemfile:
 
-  gem "doesopengraph", ">=0.1.0"
+  gem "doesopengraph"
   
 You can live on the edge, too, if you like:
 
-  gem "doesopengraph", ">=0.1.0", :git=>"git://github.com/awexome/doesopengraph.git"
+  gem "doesopengraph", :git=>"git://github.com/awexome/doesopengraph.git"
 
 
 == Example Usage
@@ -57,7 +58,7 @@ containing attributes from the graph document. You can access these attributes d
   node.picture
    => "http://profile.ak.fbcdn.net/hprofile-ak-snc4/71177_87169796810_7868331_s.jpg"
 
-Not bad. You may also notice that the returned GraphNode object contains a reference to
+Not bad! You may also notice that the returned GraphNode object contains a reference to
 the GraphAPI object that was used to access it. This allows you to run a reload on the
 node just as if it were an ActiveRecord object. Reloading will pull the latest content
 from the Open Graph and update your local object. So if someone had come along and liked
@@ -113,8 +114,8 @@ GraphAPI object with it for easy-access:
 
 With a privileged API client, you can now expose the following methods of the API:
 
-  api.node()    # just like before, but with more info; also known as api.get()
-  api.update()  # alter and add data; also known as api.post()
+  api.node()    # just like before, but with more info; aliased as api.get()
+  api.update()  # alter and add data; aliased as api.post()
   api.delete()  # delete something from the graph (a post, connection, or node)
   api.search()  # search the entire open graph
   
@@ -123,6 +124,6 @@ Explore and enjoy!
 
 == Copyright
 
-Copyright (C) 2011 by Awexome Labs, LLC
+Copyright (C) 2011-12 by Awexome Labs, LLC
 http://awexomelabs.com
 
