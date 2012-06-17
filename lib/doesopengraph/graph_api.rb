@@ -1,137 +1,140 @@
 # AWEXOME LABS
 # DoesOpenGraph
 #
-# GraphAPI - Class containing get and post mechanism for accessing nodes
-#  within the open graph
+# GraphResponse - A very simple wrapper for data returned by the OpenGraph API
 #
 
 module DoesOpenGraph
-  
-  class OpenGraphException < Exception; end
-  class IncapableOfUpdateMethods < OpenGraphException; end
-  class InvalidRequestMethod < OpenGraphException; end
-  class InvalidResponseFromFacebook < OpenGraphException; end
+  class GraphResponse
 
-  
-  
-  class GraphAPI
+    attr_reader :content, :object, :request
 
-    require "typhoeus"
-    require "uri"
-    require "json"
-
-    HTTP_GRAPH_ENDPOINT = "http://graph.facebook.com/"
-    HTTPS_GRAPH_ENDPOINT = "https://graph.facebook.com/"
-    
-    attr_reader :access_token, :history
-  
-    def initialize(acctok=nil)
-      @access_token = acctok
-      @history = Array.new
+    # Build a Response object from raw JSON HTTP response
+    def initialize(raw_content, request=nil)
+      @request = request
+      self.update(raw_content)
     end
-  
-  
-    def node(id, connection=nil, params={})
-      # Inject an access_token if we plan to make an authorized request:
-      params[:access_token] = @access_token if @access_token
-      
-      # Stringify tokens:
-      id = id.to_s
-      connection = connection.to_s unless connection.nil?
-
-      # Smoosh the URL components together:
-      base = @access_token.nil? ? HTTP_GRAPH_ENDPOINT : HTTPS_GRAPH_ENDPOINT
-      path = connection.nil? ? id : File.join(id, connection)
-      href = File.join(base, path)
-      
-      # Make a request and parse JSON result:
+    
+    # Update the stored content of this node and parse
+    def update (raw_content)
+      @content = raw_content
+      self.parse
+    end
+    
+    # Parse the stored raw content and translate into a usable object
+    def parse
       begin
-        response = Typhoeus::Request.get(href, :params=>params)
-        data = JSON.parse(response.body)
-        return GraphNode.new(data, self)
-      rescue JSON::ParserError => jsone
-        raise "Invalid JSON or poorly formed JSON returned for #{path}" and return nil
+        parsed_content = JSON.parse(@content)
+        @object = parsed_content.is_a?(Hash) ? Hashie::Mash.new(parsed_content) : parsed_content
+    
+      rescue JSON::ParserError => parse_error
+        @object = nil
+        if parse_error.message.match("unexpected token")
+          @object = true if @content == "true"
+          @object = false if @content == "false"
+        end
+        if @object.nil?
+          raise InvalidResponseFromFacebook.new("Invalid JSON returned from Facebook: #{parse_error.message}")
+        end
       end
     end
-    alias_method :get, :node
 
-
-    def update(id, connection, params={})
-      return nil unless @access_token
-      params[:access_token] = @access_token
-      
-      # Smoosh the URL components together:
-      base = HTTPS_GRAPH_ENDPOINT
-      path = File.join(id, connection)
-      href = File.join(base, path)
-      
-      # Make our POST request and check the results:
-      begin
-        response = Typhoeus::Request.post(href, :params=>params)
-        data = JSON.parse(response.body)
-        return GraphResponse.new(data)
-      rescue JSON::ParserError => jsone
-        # A JSON.parse on "true" triggers an error, so let's build it straight from body:
-        return GraphResponse.new(response.body)
-      end      
+    
+    # Update this node from theFetch an updated view of this node
+    def reload
+      raise IncapableOfUpdateMethods.new("Cannot update content without stored request") if request.nil?
+      up = request.request()
+      @content = up.content
+      @object = up.object
+      return self
     end
-    alias_method :post, :update
-
-
-    def delete(id, connection=nil)
-      return nil unless @access_token
-      params = Hash.new and params[:access_token] = @access_token
-      
-      # Smoosh the URL components together:
-      base = HTTPS_GRAPH_ENDPOINT
-      path = connection.nil? ? id : File.join(id, connection)
-      href = File.join(base, path)
-      
-      # Make our DELETE request and return the results:
-      begin
-        response = Typhoeus::Request.delete(href, :params=>params)
-        data = JSON.parse(response.body)
-        return GraphResponse.new(data)
-      rescue JSON::ParserError => jsone
-        # A JSON.parse on "true" triggers an error, so let's build it straight from body:
-        return GraphResponse.new(response.body)
+    
+    # Is this response an error?
+    def error?
+      keys.include?(:error)
+    end
+    
+    # What is the error return from Facebook in this response?
+    def error_message
+      @object.error ? @object.error.message : nil
+    end
+    
+    # Introspect on the connections available to this node
+    def introspect
+      raise IncapableOfUpdateMethods.new("Cannot update content without stored request") if request.nil?
+      request.repeat(:metadata=>1)
+    end
+    
+    # Get a connection of this node
+    def get(connection, params={})
+      raise IncapableOfUpdateMethods.new("Cannot update content without stored request") if request.nil?
+      request.api.get(object.id, connection, params)
+    end
+    
+    # Post to a connection of this node
+    def post(connection, params={})
+      raise IncapableOfUpdateMethods.new("Cannot update content without stored request") if request.nil?
+      request.api.post(object.id, connection, params)
+    end
+    
+    
+    # Load the next page of the response if paging is available
+    def next_page; page("next"); end
+    def previous_page; page("previous"); end
+        
+    # Load a specific page of results if available:
+    def page(pg, pp=25)
+      if pg.is_a?(String)
+        if object.paging 
+          if page_url = object.paging[pg]
+            data = page_url.match(/\?(\S+)/)[1].split("&").collect{|pair| pair.split("=")}.select{|k,v| k!="access_token"}
+            params = Hash.new
+            data.each {|k,v| params[k.to_sym] = v}
+            return request.repeat(params)
+          end
+        end
+      else
+        return request.repeat(:limit=>pp, :offset=>(pg-1)*pp)
       end
+      return nil
     end
     
     
-    def search(query, type, params={})
-      return nil unless @access_token
-      params[:q] = query.to_s
-      params[:type] = type.to_s      
-      request(:get, "search", params)
+    # Delete this node from the graph
+    def delete
+      raise IncapableOfUpdateMethods.new("Cannot update content without stored request") if request.nil?
+      request.api.delete(object.id)
     end
     
-    
-    def num_requests
-      @history.length
+    # Like this node, if supported
+    def like
+      raise IncapableOfUpdateMethods.new("Cannot update content without stored request") if request.nil?
+      request.api.post(object.id, "likes")
     end
     
-    def previous_request
-      @history.last
+    # Unlike this node, if supported
+    def unlike
+      raise IncapableOfUpdateMethods.new("Cannot update content without stored request") if request.nil?
+      request.api.delete(object.id, "likes")
     end
-    
-    def repeat
-      previous_request.request()
-    end    
-  
-    
-    
-    private
-    
-    
-    def request(method, path, params={})
-      api_request = GraphRequest.new(self, method, path, params)
-      @history << api_request
-      return api_request.request()
-    end
-  
 
-  end # GraphAPI    
+    
+    # What keys are available on this OpenGraph node?
+    def keys
+      object.is_a?(Hash) ? object.keys.collect{|k|k.to_sym} : Array.new
+    end
+    
+    # Include our return top-level keys in the methods list:
+    def methods()
+      keys + super()
+    end
+    
+    # Use method-missing to provide top-level keys of response Hash as methods
+    def method_missing(m, *args, &block)
+      object.include?(m.to_s) ? object.send(m.to_s) : super(m, args)
+    end
+
+  end # GraphResponse    
 end # DoesOpenGraph
       
 
