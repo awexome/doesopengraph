@@ -34,7 +34,7 @@ module DoesOpenGraph
           @object = false if @content == "false"
         end
         if @object.nil?
-          raise InvalidResponseFromFacebook.new("Invalid JSON returned from Facebook: #{parse_error.message}")
+          raise InvalidResponseFromFacebook.new("Invalid JSON returned from Facebook: #{parse_error.message} --- #{@content}")
         end
       end
     end
